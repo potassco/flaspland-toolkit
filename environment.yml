@@ -1,0 +1,12 @@
+name: flaspland
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - clingo=5.8.0
+  - numpy
+  - pip
+  - pip:
+    - flatland-rl
+    - git+https://github.com/potassco/flaspland-toolkit.git
