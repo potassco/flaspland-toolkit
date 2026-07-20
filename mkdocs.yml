@@ -1,8 +1,8 @@
-site_name: fillname
-site_url: https://potassco.org/fillname
+site_name: flaspland-toolkit
+site_url: https://potassco.org/flaspland-toolkit
 site_description:
-repo_name: potassco/fillname
-repo_url: https://github.com/potassco/fillname
+repo_name: potassco/flaspland-toolkit
+repo_url: https://github.com/potassco/flaspland-toolkit
 copyright: Copyright &copy; 2024 Potassco
 
 extra_css:
@@ -61,7 +61,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/potassco/fillname
+      link: https://github.com/potassco/flaspland-toolkit
     - icon: potassco-logo
       link: https://potassco.org
   generator: false
