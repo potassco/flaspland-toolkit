@@ -10,14 +10,14 @@ hide:
 === "Pip"
 
     ```console
-    pip install fillname
+    pip install flaspland
     ```
 
 === "Development mode"
 
     ```console
-    git clone https://github.com/potassco/fillname.git/
-    cd fillname
+    git clone https://github.com/potassco/flaspland.git/
+    cd flaspland
     pip install -e .[all]
     ```
 
@@ -31,5 +31,5 @@ hide:
 Details about the command line usage can be found with:
 
 ```console
-fillname -h
+flaspland -h
 ```

@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# fillname
+# flaspland
 
 !!! info
-    *fillname* is part of the [Potassco](https://potassco.org) suite.
+    *flaspland* is part of the [Potassco](https://potassco.org) suite.
