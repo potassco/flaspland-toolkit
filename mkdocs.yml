@@ -1,8 +1,8 @@
 site_name: flaspland
 site_url: https://potassco.org/flaspland
-site_description:
-repo_name: potassco/flaspland
-repo_url: https://github.com/potassco/flaspland
+site_description: Solve Flatland railway problems with answer set programming.
+repo_name: potassco/flaspland-toolkit
+repo_url: https://github.com/potassco/flaspland-toolkit
 copyright: Copyright &copy; 2024 Potassco
 
 extra_css:
@@ -61,7 +61,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/potassco/flaspland
+      link: https://github.com/potassco/flaspland-toolkit
     - icon: potassco-logo
       link: https://potassco.org
   generator: false
@@ -121,7 +121,7 @@ nav:
       - reference/index.md
       - Problem: reference/problem/index.md
       - Encodings: reference/encodings/index.md
-      - API: reference/api/index.md
+      - Command line: reference/api/index.md
   - Community:
       - community/index.md
       - Help: community/help.md

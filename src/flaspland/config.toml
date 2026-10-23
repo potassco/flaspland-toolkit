@@ -1,9 +1,9 @@
-# Parameters for generate_envs.py
+# Parameters for build.py
 #
 # Edit the values below to change what gets generated. Any value can also be
 # overridden for a single run on the command line, e.g.
-#     python generate_envs.py 5 --agents 8 --seed 42
-# Run `python generate_envs.py --help` to see every flag.
+#     python build.py 5 --agents 8 --seed 42
+# Run `python build.py --help` to see every flag.
 
 # --- grid -------------------------------------------------------------------
 width  = 30                      # grid width in cells

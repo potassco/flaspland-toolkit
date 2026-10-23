@@ -9,9 +9,9 @@ value with a command-line flag. Precedence: flag > config file > built-in.
 
 Examples
 --------
-    python generate_envs.py                        # 1 env, settings from config.toml
-    python generate_envs.py 10 --agents 5 --cities 3 --seed 42
-    python generate_envs.py 5 --config configs/hard.toml --malfunction-rate 0.01
+    python build.py                        # 1 env, settings from config.toml
+    python build.py 10 --agents 5 --cities 3 --seed 42
+    python build.py 5 --config configs/hard.toml --malfunction-rate 0.01
 """
 
 from __future__ import annotations

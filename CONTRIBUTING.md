@@ -24,8 +24,8 @@ When contributing to this project, you agree that you have authored 100% of the
 content, that you have the necessary rights to the content and that the content
 you contribute may be provided under the project license.
 
-[issues]: https://github.com/potassco/flaspland-toolkit.git/issues/
+[issues]: https://github.com/potassco/flaspland-toolkit/issues
 [mailing_list]: https://sourceforge.net/p/potassco/mailman/potassco-users/
-[new_issue]: https://github.com/potassco/flaspland-toolkit.git/issues/new/
-[project_url]: https://github.com/potassco/flaspland-toolkit.git/
+[new_issue]: https://github.com/potassco/flaspland-toolkit/issues/new
+[project_url]: https://github.com/potassco/flaspland-toolkit
 [subscribe]: https://sourceforge.net/projects/potassco/lists/potassco-users/

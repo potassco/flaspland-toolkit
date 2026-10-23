@@ -56,6 +56,13 @@ class MalfunctionManager():
         return(new)
 
 
+def check_plan(action_list, when) -> list:
+    """ stop with a clear message if clingo did not produce a plan """
+    if action_list is None:
+        raise SystemExit(f"No plan found {when}: see the clingo output above (e.g. UNSATISFIABLE, or an error in an encoding).")
+    return(action_list)
+
+
 class SimulationManager():
     def __init__(self,env,encodings):
         self.env = env
@@ -66,7 +73,7 @@ class SimulationManager():
         # pass env, encodings
         app = FlatlandPlan(self.env, None)
         clingo_main(app, self.encodings)
-        return(app.action_list)
+        return(check_plan(app.action_list, "for the initial plan"))
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
         """ provide additional facts when updating list """
@@ -83,7 +90,7 @@ class SimulationManager():
         # pass env, encodings, context
         app = FlatlandPlan(self.env, context)
         clingo_main(app, self.encodings)
-        return(app.action_list)
+        return(check_plan(app.action_list, "while replanning after a malfunction"))
 
 
 class OutputLogManager():

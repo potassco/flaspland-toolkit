@@ -41,7 +41,7 @@ Make sure the documentation dependencies for the project are properly installed
 with
 
 ```bash
-pip install .[doc]
+pip install -e ".[doc]"
 ```
 
 To run the documentation locally use the following command and click the
