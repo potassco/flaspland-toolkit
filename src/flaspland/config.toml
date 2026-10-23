@@ -1,0 +1,40 @@
+# Parameters for generate_envs.py
+#
+# Edit the values below to change what gets generated. Any value can also be
+# overridden for a single run on the command line, e.g.
+#     python generate_envs.py 5 --agents 8 --seed 42
+# Run `python generate_envs.py --help` to see every flag.
+
+# --- grid -------------------------------------------------------------------
+width  = 30                      # grid width in cells
+height = 30                      # grid height in cells
+max_num_cities = 2               # at least 2
+grid_mode = false                # true = cities on a regular grid, false = random placement
+max_rails_between_cities = 2     # max. rails connecting two cities
+max_rail_pairs_in_city = 2       # max. parallel track pairs inside a city
+
+# --- trains -----------------------------------------------------------------
+number_of_agents = 2
+remove_agents_at_target = true   # take trains off the grid once they arrive
+# Cities each train visits, counting start and end: 2 = start/end only,
+# 3 = one intermediate stop, ... Needs max_num_cities >= line_length.
+# Commented out = Flatland's default (start and end only).
+# line_length = 3
+
+# --- malfunctions -----------------------------------------------------------
+malfunction_rate = 0.0           # between 0 and 1; 0 = no malfunctions
+min_duration = 20                # shortest malfunction, in steps
+max_duration = 50                # longest malfunction, in steps
+
+# --- reproducibility --------------------------------------------------------
+# Uncomment to get the same environments every run (env i uses seed + i).
+# Leave commented out for fresh random environments.
+# seed = 42
+
+# --- train speeds -----------------------------------------------------------
+# Share of trains running at each speed (1.0 = one cell per step).
+# Speeds must be quoted and the shares must add up to 1.
+# Keep this section last: in TOML, every key below a [header] belongs to it.
+[speed_ratio_map]
+"1.0" = 1.0
+# "0.5" = 0.0
