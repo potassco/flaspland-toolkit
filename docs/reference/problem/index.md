@@ -74,15 +74,15 @@ for every train `ID` and time step `T`, starting at `0`, where `Action` is one o
 | `move_right` | Take the right branch at a switch. |
 | `wait` | Stay where you are. |
 
-`solve.py` uses the last model clingo reports, so with optimisation
-statements the best plan found is simulated. Other atoms in the model are
-ignored.
+`flaspland solve` uses the last model clingo reports: the first plan found,
+or, with optimisation statements, the best plan found. Other atoms in the model
+are ignored.
 
 `test.lp` is an example of a complete, valid output for `envs/pkl/test.pkl`.
 
 ## Replanning after a malfunction
 
-When a train breaks down during the simulation, `solve.py` runs your encodings
+When a train breaks down during the simulation, `flaspland solve` runs your encodings
 again on the same environment, with these extra facts and constraints added:
 
 | Added | Meaning |

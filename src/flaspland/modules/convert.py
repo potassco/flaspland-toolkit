@@ -39,7 +39,6 @@ def convert_to_clingo(env) -> str:
             Arr = agent_info.waypoints_latest_arrival[wp]
             clingo_str += f"\nwaypoint({agent_num},{wp},({Y},{X}),{dir_map[Dir]},{Arr},{Dep}). % waypoint(Z,Ord,(Y,X),Dir,Arr,Dep)."
 
-        print(agent_info.waypoints, agent_info.waypoints_earliest_departure, agent_info.waypoints_latest_arrival)
         # goal location
         clingo_str += f"\nend({agent_num},({goal_y},{goal_x}),{max_end}). "
 

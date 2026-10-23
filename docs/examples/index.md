@@ -5,16 +5,17 @@ hide:
 
 # Examples
 
-All commands on this page are run from the `src/flaspland` folder, with your
-flaspland environment activated (see [Getting started](../getting_started.md)).
+All commands on this page are run with your flaspland environment activated
+(see [Getting started](../getting_started.md)), in the folder you work in.
 
 ## Running the sample solution
 
-The repository ships with a small environment, `envs/pkl/test.pkl`, and a
-hand-written solution for it, `test.lp`.
+The toolkit ships with a small environment, `envs/pkl/test.pkl`, and a
+hand-written solution for it, `test.lp`, in its `examples` folder.
 
 ```console
-python solve.py envs/pkl/test.pkl test.lp
+cd flaspland-toolkit/examples
+flaspland solve envs/pkl/test.pkl test.lp
 ```
 
 <div class="grid" markdown>
@@ -50,7 +51,7 @@ action(train(0),move_left,9).     % follow the switch to the left
 ```
 
 Your encodings have to produce atoms of exactly this form. The run writes
-`output/<timestamp>/paths.csv`, which shows what happened at every step:
+`output/<date>_<time>/paths.csv`, which shows what happened at every step:
 
 ```text
 agent;timestep;position;direction;status;given_command
@@ -71,14 +72,15 @@ removed at its target).
 
 ## Generating environments
 
-`build.py` creates new environments. Without options it reads its settings from
-`config.toml`:
+`flaspland build` creates new environments in the `envs` folder of the current
+folder:
 
 ```console
-python build.py
+flaspland build
 ```
 
 ```text
+note: no config.toml in this folder, using built-in defaults
 [env_001--2_2] saved (seed=None)
 ```
 
@@ -88,7 +90,7 @@ Each environment is saved three times under the same name,
 | File | Used by |
 | --- | --- |
 | `envs/lp/env_001--2_2.lp` | your encoding: the environment as clingo facts |
-| `envs/pkl/env_001--2_2.pkl` | `solve.py`: the full Flatland environment |
+| `envs/pkl/env_001--2_2.pkl` | `flaspland solve`: the full Flatland environment |
 | `envs/png/env_001--2_2.png` | you: a picture of the network |
 
 Numbers continue from the highest existing one, so earlier environments are
@@ -99,32 +101,39 @@ environments with four trains, three cities and one intermediate stop per
 train:
 
 ```console
-python build.py 5 --agents 4 --cities 3 --line-length 3
+flaspland build 5 --agents 4 --cities 3 --line-length 3
 ```
 
 Use `--seed` to get the same environments every time, for example to share a
 benchmark with others:
 
 ```console
-python build.py 10 --seed 42
+flaspland build 10 --seed 42
 ```
 
-To keep a set of settings, copy `config.toml`, edit it, and pass it with
-`--config`:
+To change the settings permanently, create a `config.toml` and edit it.
+`flaspland build` uses it automatically whenever it is run in that folder:
 
 ```console
-python build.py 10 --config hard.toml
+flaspland init
+```
+
+To keep several sets of settings, copy `config.toml`, edit the copy, and pass
+it with `--config`:
+
+```console
+flaspland build 10 --config hard.toml
 ```
 
 All options are listed in the [command line reference](../reference/api/index.md#buildpy).
 
 ## Organising encodings with `#include`
 
-`solve.py` takes any number of `.lp` files after the environment and loads them
-all into clingo as one program:
+`flaspland solve` takes any number of `.lp` files after the environment and
+loads them all into clingo as one program:
 
 ```console
-python solve.py envs/pkl/env_001--2_2.pkl encodings/paths.lp encodings/timing.lp
+flaspland solve envs/pkl/env_001--2_2.pkl encodings/paths.lp encodings/timing.lp
 ```
 
 Typing every file each time is error-prone. Instead, create one main file that
@@ -139,7 +148,7 @@ includes the parts you want to use together:
 and pass only that file:
 
 ```console
-python solve.py envs/pkl/env_001--2_2.pkl encodings/main.lp
+flaspland solve envs/pkl/env_001--2_2.pkl encodings/main.lp
 ```
 
 Paths in `#include` are relative to the file that contains them, so
@@ -148,8 +157,38 @@ variants side by side, for example `main-simple.lp` and `main-optimised.lp`,
 and always know which files belong together.
 
 !!! note
-    Do not include the environment's `.lp` file yourself. `solve.py` adds the
-    environment facts automatically, from the `.pkl` you pass.
+    Do not include the environment's `.lp` file yourself. `flaspland solve` adds
+    the environment facts automatically, from the `.pkl` you pass.
+
+## Optimisation and time limits
+
+With optimisation statements (`#minimize` or weak constraints) clingo reports
+better and better plans until it has found the best one, and `flaspland solve`
+simulates that last, optimal plan. It tells you which model it used:
+
+```text
+flaspland: using model 3 with cost [1] (optimal)
+```
+
+Finding the optimum can take long. Use `--time-limit` to stop clingo after a
+number of seconds and simulate the best plan found so far:
+
+```console
+flaspland solve envs/pkl/env_001--2_2.pkl encodings/main.lp --time-limit 60
+```
+
+```text
+flaspland: clingo was stopped (solving stopped by signal)
+flaspland: using model 93 with cost [626] (optimality not proven)
+```
+
+Any other clingo option can be given after `--`. For example, to use four
+threads, or to stop at the first plan clingo finds:
+
+```console
+flaspland solve envs/pkl/env_001--2_2.pkl encodings/main.lp -- --parallel-mode=4
+flaspland solve envs/pkl/env_001--2_2.pkl encodings/main.lp -- --models=1
+```
 
 ## Malfunctions and replanning
 
@@ -157,17 +196,17 @@ Trains can break down. Generate environments with malfunctions by giving a
 malfunction rate (the chance per train and step):
 
 ```console
-python build.py --malfunction-rate 0.05 --min-duration 2 --max-duration 5
+flaspland build --malfunction-rate 0.05 --min-duration 2 --max-duration 5
 ```
 
-When a train breaks down during the simulation, `solve.py` calls your encodings
+When a train breaks down during the simulation, `flaspland solve` calls your encodings
 again with extra facts describing the situation: the actions already executed,
 the broken train, and the rest of the previous plan. Your encoding then has to
 produce a new plan that keeps the past fixed and lets the broken train wait
 until it is repaired. The facts are described in the
 [problem specification](../reference/problem/index.md#replanning-after-a-malfunction).
 
-If your encoding finds no plan at this point, `solve.py` stops with:
+If your encoding finds no plan at this point, `flaspland solve` stops with:
 
 ```text
 No plan found while replanning after a malfunction: see the clingo output above (e.g. UNSATISFIABLE, or an error in an encoding).

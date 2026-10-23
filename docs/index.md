@@ -24,29 +24,29 @@ to repair the plan.
 
 ```mermaid
 flowchart LR
-    cfg["config.toml / flags"] --> build["build.py"]
+    cfg["config.toml / flags"] --> build["flaspland build"]
     build --> lp["envs/lp/*.lp (clingo facts)"]
     build --> pkl["envs/pkl/*.pkl (Flatland)"]
     build --> png["envs/png/*.png (picture)"]
     lp -. "read while writing" .-> enc["your encoding (main.lp)"]
-    pkl --> solve["solve.py"]
+    pkl --> solve["flaspland solve"]
     enc --> solve
     solve --> gif["output/.../animation.gif"]
     solve --> csv["output/.../paths.csv"]
 ```
 
-1. **`build.py`** creates environments and saves each one three ways: as clingo
+1. **`flaspland build`** creates environments and saves each one three ways: as clingo
    facts (`.lp`), as a Flatland object (`.pkl`) and as an image (`.png`).
 2. **Your encoding** reads the facts and produces `action/3` atoms, a plan for
    every train.
-3. **`solve.py`** loads the `.pkl`, asks clingo for a plan using your encoding,
+3. **`flaspland solve`** loads the `.pkl`, asks clingo for a plan using your encoding,
    runs it in Flatland, replans on malfunctions, and saves an animation and a
    log.
 
 ## Where to go next
 
-- [Getting started](getting_started.md): install everything with one command
-  and run the sample solution.
+- [Getting started](getting_started.md): install the toolkit once and use it
+  in your own project folder.
 - [Examples](examples/index.md): generate environments, organise encodings and
   deal with malfunctions.
 - [Problem specification](reference/problem/index.md): the input facts your

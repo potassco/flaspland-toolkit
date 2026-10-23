@@ -5,19 +5,34 @@ icon: "material/console"
 
 # Command line reference
 
-Both tools are run from the `src/flaspland` folder.
+All commands work in the current folder: environments are read from and
+written to `envs/`, results to `output/`. Run `flaspland <command> -h` to see
+the options in the terminal.
 
-## build.py
+## flaspland init
+
+Creates `config.toml` with the default settings for `flaspland build`, so you
+can edit them.
+
+```console
+flaspland init [--force]
+```
+
+| Option | Meaning |
+| --- | --- |
+| `--force` | Overwrite an existing `config.toml`. |
+
+## flaspland build
 
 Generates environments and saves each one to `envs/lp/`, `envs/pkl/` and
 `envs/png/`.
 
 ```console
-python build.py [num_envs] [options]
+flaspland build [num_envs] [options]
 ```
 
-Settings are taken from `config.toml` unless given as a flag
-(flag > config file > built-in default).
+Settings are taken from `config.toml` in the current folder, if it exists,
+unless given as a flag (flag > config file > built-in default).
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -42,7 +57,8 @@ after the highest existing environment.
 ### config.toml
 
 The same settings as the flags, using the names below. Only the keys you want
-to change need to be present.
+to change need to be present. `flaspland init` creates a commented version of
+this file.
 
 ```toml
 width  = 30
@@ -67,22 +83,29 @@ max_duration = 50
 "1.0" = 1.0
 ```
 
-## solve.py
+## flaspland solve
 
 Solves an environment with your encodings, simulates the plan in Flatland and
 replans when a train breaks down.
 
 ```console
-python solve.py ENV ENCODING [ENCODING ...] [--no-render]
+flaspland solve ENV ENCODING [ENCODING ...] [options] [-- CLINGO_OPTIONS]
 ```
 
 | Argument | Meaning |
 | --- | --- |
-| `ENV` | The environment, a `.pkl` file created by `build.py`. |
+| `ENV` | The environment, a `.pkl` file created by `flaspland build`. |
 | `ENCODING` | One or more `.lp` files, for example a single main file of `#include` statements. |
+| `--time-limit SECONDS` | Stop each clingo call after this many seconds and use the best plan found so far. |
 | `--no-render` | Simulate without drawing the animation (much faster). |
+| `-- CLINGO_OPTIONS` | Everything after `--` is passed to clingo, e.g. `-- --parallel-mode=4`. |
 
-Each run creates a new folder `output/<timestamp>/` containing:
+clingo runs with its usual settings: it stops at the first plan, unless the
+encodings contain optimisation statements, in which case it continues until the
+optimal plan is found. The last plan clingo reports is simulated, and
+`flaspland solve` prints which one it used.
+
+Each run creates a new folder `output/<date>_<time>/` containing:
 
 | File | Contents |
 | --- | --- |

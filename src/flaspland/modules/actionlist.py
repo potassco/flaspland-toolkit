@@ -1,7 +1,7 @@
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_env import RailEnvActions
 from flatland.utils.rendertools import RenderTool, AgentRenderVariant
-from modules.convert import convert_actions_to_flatland
+from .convert import convert_actions_to_flatland
 
 def to_dicts(action_list):
     """

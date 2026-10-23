@@ -10,10 +10,10 @@ learn about specific components, or access essential resources.
 
 - **Problem specification:** The facts your encoding receives, the actions it
   must produce, and what changes when a train breaks down.
-- **Encodings:** How to pass encodings to `solve.py`, organise them with
-  `#include` and test them on their own.
-- **Command line:** All options of `build.py` and `solve.py`, `config.toml`,
-  and the files they create.
+- **Encodings:** How to pass encodings to `flaspland solve`, organise them
+  with `#include` and test them on their own.
+- **Command line:** All options of `flaspland init`, `build` and `solve`,
+  `config.toml`, and the files they create.
 
 <!-- - **Advanced Topics:** Gain insights into complex use cases and integrations. -->
 

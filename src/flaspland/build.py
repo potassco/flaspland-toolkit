@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
 """
 Generate Flatland environments and export them for clingo (.lp), as an image
-(.png) and as a pickle (.pkl).
+(.png) and as a pickle (.pkl), into envs/ in the current folder.
 
-Parameters are read from config.toml (next to this script). Edit that file to
-change the defaults, point --config at another file, or override any single
-value with a command-line flag. Precedence: flag > config file > built-in.
+Parameters are read from config.toml in the current folder if there is one
+(`flaspland init` creates it). Point --config at another file, or override any
+single value with a command-line flag. Precedence: flag > config file > built-in.
 
 Examples
 --------
-    python build.py                        # 1 env, settings from config.toml
-    python build.py 10 --agents 5 --cities 3 --seed 42
-    python build.py 5 --config configs/hard.toml --malfunction-rate 0.01
+    flaspland build                        # 1 env, settings from config.toml
+    flaspland build 10 --agents 5 --cities 3 --seed 42
+    flaspland build 5 --config configs/hard.toml --malfunction-rate 0.01
 """
 
 from __future__ import annotations
@@ -25,9 +24,9 @@ import warnings
 from pathlib import Path
 
 # custom modules
-from modules.dirs import create_dirs, find_start
-from modules.save import save_lp, save_png, save_pkl
-from modules.convert import convert_to_clingo
+from .modules.dirs import create_dirs, find_start
+from .modules.save import save_lp, save_png, save_pkl
+from .modules.convert import convert_to_clingo
 
 # Flatland modules
 from flatland.envs.rail_env import RailEnv
@@ -37,7 +36,8 @@ from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 
 
-DEFAULT_CONFIG = Path(__file__).resolve().parent / "config.toml"
+# used when --config is not given and the file exists in the current folder
+DEFAULT_CONFIG = Path("config.toml")
 
 DEFAULTS = {
     "width": 30,
@@ -142,13 +142,16 @@ def load_config(parser: argparse.ArgumentParser, path: Path) -> dict:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Generate Flatland environments and export them for clingo.",
+        prog="flaspland build",
+        description="Generate Flatland environments and export them for clingo. "
+                    "They are saved to envs/ in the current folder.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("num_envs", type=positive_int, nargs="?", default=1,
                         help="number of environments to create")
-    parser.add_argument("-c", "--config", type=Path, metavar="FILE", default=DEFAULT_CONFIG,
-                        help="TOML file with the generation parameters (flags override it)")
+    parser.add_argument("-c", "--config", type=Path, metavar="FILE", default=None,
+                        help="TOML file with the generation parameters (flags override it); "
+                             "default: config.toml in the current folder, if it exists")
 
     grid = parser.add_argument_group("grid")
     grid.add_argument("--width", type=positive_int, metavar="N", help="grid width in cells")
@@ -196,12 +199,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # First pass only looks for --config, so its values can become the defaults
     # before the real parse. Explicit flags still win.
     pre, _ = parser.parse_known_args(argv)
-    if pre.config.is_file():
-        parser.set_defaults(**load_config(parser, pre.config))
-    elif pre.config == DEFAULT_CONFIG:
-        print(f"note: {DEFAULT_CONFIG.name} not found, using built-in defaults", file=sys.stderr)
+    config = pre.config
+    if config is None and DEFAULT_CONFIG.is_file():
+        config = DEFAULT_CONFIG
+    if config is None:
+        print("note: no config.toml in this folder, using built-in defaults", file=sys.stderr)
+    elif config.is_file():
+        print(f"note: using settings from {config}", file=sys.stderr)
+        parser.set_defaults(**load_config(parser, config))
     else:
-        parser.error(f"config file not found: {pre.config}")
+        parser.error(f"config file not found: {config}")
 
     args = parser.parse_args(argv)
     validate(parser, args)

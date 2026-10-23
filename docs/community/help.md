@@ -13,12 +13,11 @@ or from running a command in the wrong folder.
 
 ??? failure "`requires a different Python: 3.13.x not in '<3.13,>=3.11'`"
     flaspland needs Python 3.11 or 3.12. Create an environment with a supported
-    version and install again, for example:
+    version and install again. In the `flaspland-toolkit` folder, run:
 
     ```console
-    conda create -n flaspland python=3.12 -y
+    conda env create -f environment.yml
     conda activate flaspland
-    pip install -e .
     ```
 
     See [Getting started](../getting_started.md#installation) for `venv`
@@ -32,26 +31,27 @@ or from running a command in the wrong folder.
     pip install -e ".[doc]"
     ```
 
-??? failure "`ModuleNotFoundError: No module named 'flatland'` (or `'clingo'`)"
-    The packages are not installed in the Python you are using. Usually the
+??? failure "`flaspland: command not found` or `ModuleNotFoundError: No module named 'flatland'`"
+    flaspland is not installed in the Python you are using. Usually the
     environment is not activated in this terminal: run
-    `conda activate flaspland` (or `source .venv/bin/activate`) and try again.
-    If that does not help, run `pip install -e .` in the repository's root
-    folder.
+    `conda activate flaspland` (or activate your `venv`, see
+    [Getting started](../getting_started.md#activate-the-environment)) and try
+    again. If that does not help, run `pip install -e .` in the
+    `flaspland-toolkit` folder with the environment activated.
 
-### Running build.py and solve.py
+### Running flaspland build and flaspland solve
 
 ??? failure "`Could not load '….pkl' (No module named 'flatland.core.grid.rail_env_grid')`"
     The `.pkl` file was created with a different version of Flatland. Flatland
     reorganises its code between releases, so saved environments only load with
     the version that created them. Create the environment again with
-    `python build.py`.
+    `flaspland build`.
 
 ??? failure "`error: file could not be opened` (from clingo)"
     clingo cannot find one of the encoding files. Paths on the command line are
-    relative to the folder you are in, so check the path and run the command
-    from `src/flaspland`. Paths inside `#include` statements are relative to the
-    file containing them.
+    relative to the folder you are in, so check the path (tab completion
+    helps). Paths inside `#include` statements are relative to the file
+    containing them.
 
 ??? failure "`No plan found for the initial plan` / `No plan found while replanning after a malfunction`"
     clingo found no answer set (look for `UNSATISFIABLE` above the message) or
@@ -77,19 +77,25 @@ or from running a command in the wrong folder.
     derives. The second one means a file was included twice and only loaded
     once.
 
-??? question "`solve.py` runs for a very long time"
-    - Add `--no-render`: drawing the animation is the slowest part.
-    - `solve.py` asks clingo for all answer sets. If your encoding has many,
-      clingo enumerates every one of them. Use `#minimize` or make the plan
-      unique. See [Encodings](../reference/encodings/index.md#things-to-keep-in-mind).
+??? question "`flaspland solve` runs for a very long time"
+    - Look at the clingo output. If it keeps printing `Answer:` lines with a
+      decreasing `Optimization:` value, clingo is still improving the plan:
+      add `--time-limit 60` to simulate the best plan found after a minute.
+      See [Optimisation and time limits](../examples/index.md#optimisation-and-time-limits).
+    - If clingo prints nothing for a long time, grounding or solving your
+      encoding is hard. Test it on a small environment with
+      `python -m clingo envs/lp/<env>.lp <encoding>.lp --stats`.
+    - Add `--no-render` if the simulation itself is slow: drawing the
+      animation takes most of that time.
 
 ??? question "My environments or results are in a different folder"
-    `build.py` writes to `envs/` and `solve.py` writes to `output/` in the
-    folder you run them from. Run both from `src/flaspland`.
+    `flaspland build` writes to `envs/` and `flaspland solve` writes to
+    `output/` in the folder you run them from. Run them in your project
+    folder.
 
 ??? question "`[--no-render]` is treated as a file name"
     Square brackets in usage messages only mean "optional". Type the option
-    without them: `python solve.py envs/pkl/test.pkl test.lp --no-render`.
+    without them: `flaspland solve envs/pkl/test.pkl test.lp --no-render`.
 
 ## Further help
 
@@ -104,8 +110,8 @@ or from running a command in the wrong folder.
 !!! question "Open an issue"
     Search the [issue tracker][issues] first, then open an [issue][new_issue]
     describing your problem. Include the full command you ran, the complete
-    error message, and the output of `python --version` and
-    `pip show flatland-rl clingo`.
+    error message, and the output of `flaspland --version`,
+    `python --version` and `pip show flatland-rl clingo`.
 
 !!! tip "Mailing list"
     The Potassco [mailing list][mailing_list] may already have an answer. You

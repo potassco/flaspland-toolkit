@@ -5,37 +5,41 @@ them with answer set programming using [clingo](https://potassco.org/clingo/).
 
 ## Installation
 
-flaspland needs **Python 3.11 or 3.12**. Create an environment and install
-everything with one command:
+Install the toolkit once; the `flaspland` command then works in any folder.
 
 ```bash
-conda create -n flaspland python=3.12 -y && conda activate flaspland
-git clone https://github.com/potassco/flaspland-toolkit.git && cd flaspland-toolkit && pip install -e .
+git clone https://github.com/potassco/flaspland-toolkit.git
+cd flaspland-toolkit
+conda env create -f environment.yml
 ```
 
-All required packages are listed under `dependencies` in `pyproject.toml`. See
-the [getting started guide](docs/getting_started.md) for `venv` and Windows
-instructions.
+This creates a conda environment `flaspland` with Python 3.12 and all
+dependencies. Without conda, use any Python 3.11 or 3.12 environment and run
+`pip install -e .` in this folder. See the
+[getting started guide](docs/getting_started.md) for details.
 
 ## Usage
 
-The tools are run from `src/flaspland`:
+Activate the environment and go to your own project folder:
 
 ```bash
-cd src/flaspland
+conda activate flaspland
+cd my-project
 
-# solve the sample environment with the sample solution
-python solve.py envs/pkl/test.pkl test.lp
-
-# generate new environments (settings in config.toml)
-python build.py 5 --agents 3
-
-# solve one of them with your own encodings
-python solve.py envs/pkl/env_001--3_2.pkl encodings/main.lp
+flaspland init                       # create config.toml with the build settings
+flaspland build 5 --agents 3         # generate environments into envs/
+flaspland solve envs/pkl/env_001--3_2.pkl encodings/main.lp
 ```
 
-Results are saved to `output/<timestamp>/` as `animation.gif` and `paths.csv`.
-Run `python build.py -h` or `python solve.py -h` for all options.
+Results are saved to `output/<date>_<time>/` as `animation.gif` and
+`paths.csv`. Run `flaspland <command> -h` for all options.
+
+To try the sample solution that comes with the toolkit:
+
+```bash
+cd flaspland-toolkit/examples
+flaspland solve envs/pkl/test.pkl test.lp
+```
 
 ## Documentation
 
@@ -47,5 +51,5 @@ pip install -e ".[doc]"
 mkdocs serve -o
 ```
 
-Instructions to install and use `nox` can be found in
+Instructions for running the tests and code checks can be found in
 [DEVELOPMENT.md](./DEVELOPMENT.md).

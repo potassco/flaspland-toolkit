@@ -1,24 +1,33 @@
+"""
+Solve a Flatland environment with ASP encodings and simulate the plan.
+
+Run as `flaspland solve ENV ENCODING [ENCODING ...]`; see `flaspland solve -h`.
+"""
+
 # standard packages
+import sys
 import warnings
-import os 
+import os
 import time
 import pickle
-import json
+import tempfile
 from argparse import ArgumentParser, Namespace
+from pathlib import Path
 
 # custom modules
-from modules.api import FlatlandPlan, FlatlandReplan
-from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo
+from .modules.api import FlatlandPlan
+from .modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo
 
 # clingo
-import clingo
-from clingo.application import Application, clingo_main
+from clingo.application import clingo_main
 
 # rendering visualizations
 from flatland.envs.rail_env import RailEnvActions
 from flatland.utils.rendertools import RenderTool
 import imageio.v2 as imageio
 from PIL import Image, ImageDraw, ImageFont
+
+FONT = Path(__file__).resolve().parent / "modules" / "LiberationMono-Regular.ttf"
 
 
 class MalfunctionManager():
@@ -64,15 +73,16 @@ def check_plan(action_list, when) -> list:
 
 
 class SimulationManager():
-    def __init__(self,env,encodings):
+    def __init__(self,env,encodings,clingo_args=()):
         self.env = env
         self.encodings = encodings
+        self.clingo_args = list(clingo_args)
 
     def build_actions(self) -> list:
         """ create initial list of actions """
         # pass env, encodings
         app = FlatlandPlan(self.env, None)
-        clingo_main(app, self.encodings)
+        clingo_main(app, self.encodings + self.clingo_args)
         return(check_plan(app.action_list, "for the initial plan"))
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
@@ -89,7 +99,7 @@ class SimulationManager():
         """ update list of actions following malfunction """
         # pass env, encodings, context
         app = FlatlandPlan(self.env, context)
-        clingo_main(app, self.encodings)
+        clingo_main(app, self.encodings + self.clingo_args)
         return(check_plan(app.action_list, "while replanning after a malfunction"))
 
 
@@ -101,11 +111,9 @@ class OutputLogManager():
         """ add info from a timestep to the log """
         self.logs.append(info)
 
-    def save(self,filename) -> None:
+    def save(self,directory) -> None:
         """ save output log to local drive """
-        #with open(f"output/{filename}/paths.json", "w") as f:
-        #    f.write(json.dumps(self.logs))
-        with open(f"output/{filename}/paths.csv", "w") as f:
+        with open(os.path.join(directory, "paths.csv"), "w") as f:
             f.write("agent;timestep;position;direction;status;given_command\n")
             for log in self.logs:
                 f.write(log)
@@ -120,27 +128,57 @@ def get_position_and_direction(agent) -> tuple:
     return(None, agent.initial_configuration[1])
 
 
-def get_args():
-    """ capture command line inputs """
-    parser = ArgumentParser()
-    parser.add_argument('env', type=str, help='the Flatland environment as a .pkl file')
+def get_args(argv=None):
+    """ capture command line inputs; everything after `--` is passed on to clingo """
+    argv = sys.argv[1:] if argv is None else list(argv)
+    clingo_args = []
+    if '--' in argv:
+        split = argv.index('--')
+        argv, clingo_args = argv[:split], argv[split+1:]
+
+    parser = ArgumentParser(
+        prog='flaspland solve',
+        description='Solve a Flatland environment with your encodings and simulate the plan. '
+                    'Results are saved to output/<date>_<time>/ in the current folder.',
+        epilog="Options after '--' are passed on to clingo, e.g. 'flaspland solve env.pkl main.lp -- -t 4'.")
+    parser.add_argument('env', type=str, help='the Flatland environment, a .pkl file created by flaspland build')
     parser.add_argument('encodings', type=str, nargs='+', help='one or more encodings (.lp) to load into clingo, e.g. a single file of #include statements')
+    parser.add_argument('--time-limit', type=int, metavar='SECONDS', help='stop each clingo call after SECONDS and use the best plan found so far')
     parser.add_argument('--no-render', action='store_true', help='if included, run the Flatland simulation but do not render a GIF')
-    return(parser.parse_args())
+    args = parser.parse_args(argv)
+
+    if args.time_limit is not None:
+        clingo_args.append(f'--time-limit={args.time_limit}')
+    args.clingo_args = clingo_args
+    return(args)
 
 
-def main():
-    args: Namespace = get_args()
+def create_output_dir() -> str:
+    """ create a new folder output/<date>_<time> in the current folder """
+    stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+    path = os.path.join("output", stamp)
+    number = 1
+    while os.path.exists(path):
+        number += 1
+        path = os.path.join("output", f"{stamp}_{number}")
+    os.makedirs(path)
+    return(path)
+
+
+def main(argv=None) -> int:
+    args: Namespace = get_args(argv)
+    if not os.path.isfile(args.env):
+        raise SystemExit(f"Environment not found: {args.env}")
     with open(args.env, "rb") as f:
         try:
             env = pickle.load(f)
         except (ModuleNotFoundError, AttributeError) as e:
-            raise SystemExit(f"Could not load '{args.env}' ({e}). It was probably created with a different version of flatland; regenerate it with build.py.")
+            raise SystemExit(f"Could not load '{args.env}' ({e}). It was probably created with a different version of flatland; regenerate it with 'flaspland build'.")
     no_render = args.no_render
 
     # create manager objects
     mal = MalfunctionManager(env.get_num_agents())
-    sim = SimulationManager(env, args.encodings)
+    sim = SimulationManager(env, args.encodings, args.clingo_args)
     log = OutputLogManager()
 
     # envrionment rendering
@@ -150,8 +188,8 @@ def main():
         env_renderer.reset()
         images = []
 
-    # create directory
-    os.makedirs("tmp/frames", exist_ok=True)
+    # temporary directory for the rendered frames
+    frames = tempfile.TemporaryDirectory()
     action_map = {RailEnvActions.MOVE_LEFT:'move_left', RailEnvActions.MOVE_FORWARD:'move_forward', RailEnvActions.MOVE_RIGHT:'move_right', RailEnvActions.STOP_MOVING:'wait'}
     state_map = {0:'waiting', 1:'ready to depart', 2:'malfunction (off map)', 3:'moving', 4:'stopped', 5:'malfunction (on map)', 6:'done'}
     dir_map = {0:'n', 1:'e', 2:'s', 3:'w'}
@@ -182,7 +220,7 @@ def main():
         mal.deduct() #??? where in the loop should this go - before context?
         
         # render an image
-        filename = 'tmp/frames/flatland_frame_{:04d}.png'.format(timestep)
+        filename = os.path.join(frames.name, 'flatland_frame_{:04d}.png'.format(timestep))
         if env_renderer is not None:
             env_renderer.render_env(show=True, show_observations=False, show_predictions=False)
             env_renderer.gl.save_image(filename)
@@ -194,7 +232,7 @@ def main():
                 padding = 10
                 font_size = int(min(img.width, img.height) * 0.10)
                 try:
-                    font = ImageFont.truetype("modules/LiberationMono-Regular.ttf", font_size)
+                    font = ImageFont.truetype(str(FONT), font_size)
                 except IOError:
                     font = ImageFont.load_default()
                 
@@ -219,17 +257,20 @@ def main():
 
         timestep = timestep + 1
 
-    # get time stamp for gif and output log
-    stamp = time.time()
-    os.makedirs(f"output/{stamp}", exist_ok=True)
-    
+    frames.cleanup()
+
+    # create a new folder for the gif and output log
+    output_dir = create_output_dir()
+
     # combine images into gif
     if not no_render:
-        imageio.mimsave(f"output/{stamp}/animation.gif", images, format='GIF', loop=0, duration=240)
+        imageio.mimsave(os.path.join(output_dir, "animation.gif"), images, format='GIF', loop=0, duration=240)
 
     # save output log
-    log.save(stamp)
+    log.save(output_dir)
+    print(f"flaspland: results saved to {output_dir}")
+    return(0)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

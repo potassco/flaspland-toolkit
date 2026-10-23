@@ -31,10 +31,15 @@ test = ["coverage[toml]"]
 doc = ["mkdocs<2", "mkdocs-material", "mkdocstrings[python]", "mkdoclingo"]
 dev = ["flaspland[test,typecheck,lint_pylint]"]
 
-# The tools are run as scripts from src/flaspland (see README), so installing the
-# project only installs its dependencies; there is no package to install yet.
-[tool.setuptools]
-packages = []
+[project.scripts]
+flaspland = "flaspland.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["flaspland*"]
+
+[tool.setuptools.package-data]
+flaspland = ["config.toml", "py.typed", "modules/*.ttf"]
 
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
