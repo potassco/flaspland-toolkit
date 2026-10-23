@@ -7,7 +7,6 @@ import json
 from argparse import ArgumentParser, Namespace
 
 # custom modules
-from asp import params
 from modules.api import FlatlandPlan, FlatlandReplan
 from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo
 
@@ -57,19 +56,15 @@ class MalfunctionManager():
 
 
 class SimulationManager():
-    def __init__(self,env,primary,secondary=None):
+    def __init__(self,env,encodings):
         self.env = env
-        self.primary = primary
-        if secondary is None:
-            self.secondary = primary 
-        else:
-            self.secondary = secondary
+        self.encodings = encodings
 
     def build_actions(self) -> list:
         """ create initial list of actions """
-        # pass env, primary
+        # pass env, encodings
         app = FlatlandPlan(self.env, None)
-        clingo_main(app, self.primary)
+        clingo_main(app, self.encodings)
         return(app.action_list)
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
@@ -84,9 +79,9 @@ class SimulationManager():
 
     def update_actions(self, context) -> list:
         """ update list of actions following malfunction """
-        # pass env, secondary, context
+        # pass env, encodings, context
         app = FlatlandPlan(self.env, context)
-        clingo_main(app, self.primary)
+        clingo_main(app, self.encodings)
         return(app.action_list)
 
 
@@ -107,48 +102,24 @@ class OutputLogManager():
             for log in self.logs:
                 f.write(log)
 
-def check_params(par):
-    """
-    verify that all parameters exist before proceedingd
-    """
-    required_params = {
-        "primary": list
-        #"secondary": list
-    }
-
-    # check that all required parameters exist and have the correct type
-    for param, expected_type in required_params.items():
-        if not hasattr(par, param):
-            raise ValueError(f"Required parameter '{param}' is missing from the params module")
-            
-        else:
-            # check for correct types
-            value = getattr(par, param)
-        
-            if not isinstance(value, expected_type):
-                raise TypeError(f"Parameter '{param}' should be of type {expected_type.__name__}, but got {type(value).__name__}")
-
-    return True
-
-
 def get_args():
     """ capture command line inputs """
     parser = ArgumentParser()
-    parser.add_argument('env', type=str, default='', nargs=1, help='the Flatland environment as a .pkl file')
+    parser.add_argument('env', type=str, help='the Flatland environment as a .pkl file')
+    parser.add_argument('encodings', type=str, nargs='+', help='one or more encodings (.lp) to load into clingo, e.g. a single file of #include statements')
     parser.add_argument('--no-render', action='store_true', help='if included, run the Flatland simulation but do not render a GIF')
     return(parser.parse_args())
 
 
 def main():
-    # dev test main
-    if check_params(params):
-        args: Namespace = get_args()
-        env = pickle.load(open(args.env[0], "rb"))
-        no_render = args.no_render
+    args: Namespace = get_args()
+    with open(args.env, "rb") as f:
+        env = pickle.load(f)
+    no_render = args.no_render
 
     # create manager objects
     mal = MalfunctionManager(env.get_num_agents())
-    sim = SimulationManager(env, params.primary, params.secondary)
+    sim = SimulationManager(env, args.encodings)
     log = OutputLogManager()
 
     # envrionment rendering
