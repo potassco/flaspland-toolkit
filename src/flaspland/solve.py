@@ -15,6 +15,7 @@ import clingo
 from clingo.application import Application, clingo_main
 
 # rendering visualizations
+from flatland.envs.rail_env import RailEnvActions
 from flatland.utils.rendertools import RenderTool
 import imageio.v2 as imageio
 from PIL import Image, ImageDraw, ImageFont
@@ -102,6 +103,16 @@ class OutputLogManager():
             for log in self.logs:
                 f.write(log)
 
+def get_position_and_direction(agent) -> tuple:
+    """ get an agent's position and direction; position is None while the agent is off the map """
+    if agent.current_configuration is not None:
+        return(agent.current_configuration)
+    # off the map: use the arrival direction if done, otherwise the starting direction
+    if agent.target_configuration is not None:
+        return(None, agent.target_configuration[1])
+    return(None, agent.initial_configuration[1])
+
+
 def get_args():
     """ capture command line inputs """
     parser = ArgumentParser()
@@ -114,7 +125,10 @@ def get_args():
 def main():
     args: Namespace = get_args()
     with open(args.env, "rb") as f:
-        env = pickle.load(f)
+        try:
+            env = pickle.load(f)
+        except (ModuleNotFoundError, AttributeError) as e:
+            raise SystemExit(f"Could not load '{args.env}' ({e}). It was probably created with a different version of flatland; regenerate it with build.py.")
     no_render = args.no_render
 
     # create manager objects
@@ -131,7 +145,7 @@ def main():
 
     # create directory
     os.makedirs("tmp/frames", exist_ok=True)
-    action_map = {1:'move_left',2:'move_forward',3:'move_right',4:'wait'}
+    action_map = {RailEnvActions.MOVE_LEFT:'move_left', RailEnvActions.MOVE_FORWARD:'move_forward', RailEnvActions.MOVE_RIGHT:'move_right', RailEnvActions.STOP_MOVING:'wait'}
     state_map = {0:'waiting', 1:'ready to depart', 2:'malfunction (off map)', 3:'moving', 4:'stopped', 5:'malfunction (on map)', 6:'done'}
     dir_map = {0:'n', 1:'e', 2:'s', 3:'w'}
 
@@ -141,7 +155,8 @@ def main():
     while len(actions) > timestep:
         # add to the log
         for a in actions[timestep]:
-            log.add(f'{a};{timestep};{env.agents[a].position};{dir_map[env.agents[a].direction]};{state_map[env.agents[a].state]};{action_map[actions[timestep][a]]}\n')
+            position, direction = get_position_and_direction(env.agents[a])
+            log.add(f'{a};{timestep};{position};{dir_map[direction]};{state_map[env.agents[a].state]};{action_map[actions[timestep][a]]}\n')
 
         _, _, done, info = env.step(actions[timestep])
 
