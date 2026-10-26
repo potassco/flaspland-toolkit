@@ -14,8 +14,18 @@
 To install the project, run
 
 ```bash
-pip install .
+git clone https://github.com/potassco/flaspland-toolkit.git && cd flaspland-toolkit
+conda env create -f environment.yml 
 ```
+
+After installing the project, activate the newly-created environment and navigate to your project repository. Once inside, initialize the flaspland tool for that repository.
+```bash
+conda activate flaspland
+cd my-project-repo
+flaspland init
+```
+
+From there you are free to start using `flaspland` with your project.
 
 ## Usage
 
