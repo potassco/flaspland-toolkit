@@ -1,22 +1,24 @@
 # flaspland
 
-Generate [Flatland](https://flatland.aicrowd.com) railway environments and solve
-them with answer set programming using [clingo](https://potassco.org/clingo/).
+Welcome to the `flaspland-toolkit`!
 
 ## Installation
 
 Install the toolkit once; the `flaspland` command then works in any folder.
 
 ```bash
-git clone https://github.com/potassco/flaspland-toolkit.git
-cd flaspland-toolkit
-conda env create -f environment.yml
+git clone https://github.com/potassco/flaspland-toolkit.git && cd flaspland-toolkit
+conda env create -f environment.yml 
 ```
 
-This creates a conda environment `flaspland` with Python 3.12 and all
-dependencies. Without conda, use any Python 3.11 or 3.12 environment and run
-`pip install -e .` in this folder. See the
-[getting started guide](docs/getting_started.md) for details.
+After installing the project, activate the newly-created environment and navigate to your project repository. Once inside, initialize the flaspland tool for that repository.
+```bash
+conda activate flaspland
+cd my-project-repo
+flaspland init
+```
+
+From there you are free to start using `flaspland` with your project.
 
 ## Usage
 
