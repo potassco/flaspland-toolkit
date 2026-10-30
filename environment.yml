@@ -1,0 +1,15 @@
+# Create a conda environment with flaspland and everything it needs:
+#
+#     conda env create -f environment.yml
+#     conda activate flaspland
+#
+# The toolkit is installed in editable mode, so `git pull` in this folder
+# updates it without reinstalling.
+name: flaspland
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - -e .

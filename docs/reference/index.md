@@ -8,10 +8,12 @@ learn about specific components, or access essential resources.
 
 ## What’s Inside
 
-- **API Documentation:** Comprehensive details on general classes.
-- **ASP Encodings:** Explore the encodings used in our system.
-- **Problem Specifications:** Detailed description and definitions of the
-  problem.
+- **Problem specification:** The facts your encoding receives, the actions it
+  must produce, and what changes when a train breaks down.
+- **Encodings:** How to pass encodings to `flaspland solve`, organise them
+  with `#include` and test them on their own.
+- **Command line:** All options of `flaspland init`, `build` and `solve`,
+  `config.toml`, and the files they create.
 
 <!-- - **Advanced Topics:** Gain insights into complex use cases and integrations. -->
 

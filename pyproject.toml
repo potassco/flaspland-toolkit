@@ -5,32 +5,47 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "flaspland"
 authors = [{ name = "Ryan Kepler J. Murphy", email = "ryan.murphy@uni-potsdam.de" }]
-description = "A template project."
-requires-python = ">=3.9"
+description = "Generate Flatland railway environments and solve them with answer set programming (clingo)."
+# >=3.11 for tomllib (build.py); <3.13 because flatland-rl needs numpy<2, which has no wheels for 3.13+
+requires-python = ">=3.11,<3.13"
 license = { file = "LICENSE" }
 dynamic = ["version"]
 readme = "README.md"
+dependencies = [
+    # pinned to a minor release: flatland moves modules between releases, which breaks
+    # the code and makes saved .pkl environments unloadable
+    "flatland-rl>=4.3,<4.4",
+    "clingo>=5.6",
+    "imageio",
+    "Pillow",
+]
 
 [project.urls]
-Homepage = "https://github.com/potassco/flaspland-toolkit.git/"
+Homepage = "https://github.com/potassco/flaspland-toolkit"
 
 [project.optional-dependencies]
 format = ["black", "isort", "autoflake"]
 lint_pylint = ["pylint"]
 typecheck = ["types-setuptools", "mypy"]
 test = ["coverage[toml]"]
-doc = ["mkdocs", "mkdocs-material", "mkdocstrings[python]", "mkdoclingo"]
+doc = ["mkdocs<2", "mkdocs-material", "mkdocstrings[python]", "mkdoclingo"]
 dev = ["flaspland[test,typecheck,lint_pylint]"]
 
 [project.scripts]
-flaspland = "flaspland.__main__:main"
+flaspland = "flaspland.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["flaspland*"]
+
+[tool.setuptools.package-data]
+flaspland = ["config.toml", "py.typed", "modules/*.ttf"]
 
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"
+# used when there is no git metadata, e.g. when the repository was downloaded as a ZIP file
+fallback_version = "0.0.0"
 
 [tool.isort]
 profile = "black"

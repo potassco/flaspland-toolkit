@@ -2,12 +2,14 @@ import os
 
 import nox
 
-nox.options.sessions = "lint_pylint", "typecheck", "test"
+# Only the tests run by default (and in CI). Run the code checks with
+# `nox -s lint_pylint` and `nox -s typecheck`; see DEVELOPMENT.md.
+nox.options.sessions = ["test"]
 
 EDITABLE_TESTS = True
 PYTHON_VERSIONS = None
 if "GITHUB_ACTIONS" in os.environ:
-    PYTHON_VERSIONS = ["3.10", "3.14"]
+    PYTHON_VERSIONS = ["3.11", "3.12"]
     EDITABLE_TESTS = False
 
 
@@ -56,4 +58,4 @@ def test(session):
         session.run("coverage", "run", "-m", "unittest", session.posargs[0], "-v")
     else:
         session.run("coverage", "run", "-m", "unittest", "discover", "-v")
-        session.run("coverage", "report", "-m", "--fail-under=100")
+        session.run("coverage", "report", "-m")

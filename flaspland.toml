@@ -1,0 +1,20 @@
+[build]
+width = 40
+height = 40
+agents = 4
+max_cities = 4
+seed = 1
+grid_mode = false
+max_rails_between_cities = 2
+max_rail_pairs_in_city = 2
+remove_agents_at_target = true
+
+# Map of agent speed -> fraction of agents that move at that speed.
+# Keys are quoted because TOML does not allow bare numeric keys.
+[build.speeds.speed_ratio_map]
+"1.0" = 1.0
+
+[build.malfunctions]
+rate = 0.0
+min_duration = 2
+max_duration = 6

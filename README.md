@@ -4,7 +4,7 @@ Welcome to the `flaspland-toolkit`!
 
 ## Installation
 
-To install the project, run
+Install the toolkit once; the `flaspland` command then works in any folder.
 
 ```bash
 git clone https://github.com/potassco/flaspland-toolkit.git && cd flaspland-toolkit
@@ -22,23 +22,36 @@ From there you are free to start using `flaspland` with your project.
 
 ## Usage
 
-Run the following for basic usage information:
+Activate the environment and go to your own project folder:
 
 ```bash
-flaspland -h
+conda activate flaspland
+cd my-project
+
+flaspland init                       # create config.toml with the build settings
+flaspland build 5 --agents 3         # generate environments into envs/
+flaspland solve envs/pkl/env_001--3_2.pkl encodings/main.lp
 ```
 
-To generate and open the documentation, run
+Results are saved to `output/<date>_<time>/` as `animation.gif` and
+`paths.csv`. Run `flaspland <command> -h` for all options.
+
+To try the sample solution that comes with the toolkit:
 
 ```bash
+cd flaspland-toolkit/examples
+flaspland solve envs/pkl/test.pkl test.lp
+```
+
+## Documentation
+
+The documentation covers installation, examples, the input and output format
+of encodings, and troubleshooting. To view it locally:
+
+```bash
+pip install -e ".[doc]"
 mkdocs serve -o
 ```
 
-Make sure to install the optional documentation dependencies via
-
-```bash
-pip install .[doc]
-```
-
-Instructions to install and use `nox` can be found in
-[DEVELOPMENT.md](./DEVELOPMENT.md)
+Instructions for running the tests and code checks can be found in
+[DEVELOPMENT.md](./DEVELOPMENT.md).
