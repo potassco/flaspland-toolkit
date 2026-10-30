@@ -1,4 +1,4 @@
-% % % A sample solution for the test.pkl environment
+% % % A sample solution for the example-env.pkl environment
 % % % Models should output solutions of similar format
 
 % actions for train 0
