@@ -56,8 +56,9 @@ Results are saved to `output/<date>_<time>/` as `animation.gif` and
 
 
 ### Example
-The repository `flaspland-encodings` includes an example [environment and solution](https://github.com/potassco/flaspland-encodings/tree/main/example).
-This comes automatically if you fork the repository, as suggested at the top of this document.
+The repository `flaspland-encodings` includes an example [environment and solution](https://github.com/potassco/flaspland-encodings/tree/main/example),
+which comes automatically if you fork the repository, as suggested at the top of this document.
+This example has been reproduced in this repository as well, for convenience.
 Users can refer to `example/solution.lp` as an example of expected output for a proper encoding on the environment `example-env.pkl`,
 which may help during development and debugging.
 
